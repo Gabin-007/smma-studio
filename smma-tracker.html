@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SMMA Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07070a;
+  --surface:#0e0e14;
+  --surface2:#14141e;
+  --border:#ffffff0a;
+  --border2:#ffffff15;
+  --text:#f0eff8;
+  --muted:#5a5870;
+  --muted2:#8e8ca8;
+  --radius:14px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+.glow-1{position:fixed;top:-220px;left:-150px;width:600px;height:600px;background:radial-gradient(circle,#7c3aed1a 0%,transparent 65%);pointer-events:none;z-index:0;}
+.glow-2{position:fixed;bottom:-250px;right:-150px;width:700px;height:500px;background:radial-gradient(circle,#0ea5e91a 0%,transparent 65%);pointer-events:none;z-index:0;}
+.glow-3{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);width:800px;height:400px;background:radial-gradient(ellipse,#a855f708 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+/* ══════════════════════════════
+   LOGIN OVERLAY
+══════════════════════════════ */
+#overlay{
+  position:fixed;inset:0;z-index:1000;
+  background:#07070af5;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:flex;align-items:center;justify-content:center;
+}
+
+.login-box{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:22px;
+  padding:40px 36px 36px;
+  width:100%;max-width:400px;
+  position:relative;
+  animation:popIn .4s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes popIn{from{opacity:0;transform:scale(.88) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+.login-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;border-radius:22px 22px 0 0;
+  background:linear-gradient(90deg,transparent 5%,#7c3aed80 35%,#60a5fa80 65%,transparent 95%);
+}
+
+.login-logo{
+  width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,#7c3aed,#2563eb);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:18px;
+  box-shadow:0 0 22px #7c3aed70,0 0 50px #7c3aed20;
+  margin:0 auto 20px;
+}
+.login-title{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:22px;
+  text-align:center;letter-spacing:-.4px;margin-bottom:6px;
+}
+.login-sub{font-size:12.5px;color:var(--muted);text-align:center;margin-bottom:28px;line-height:1.5;}
+
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+.field input{
+  width:100%;padding:11px 14px;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  font-family:'Inter',sans-serif;font-size:14px;color:var(--text);
+  outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.field input:focus{border-color:#7c3aed80;box-shadow:0 0 0 3px #7c3aed18;}
+.field input::placeholder{color:#ffffff20;}
+
+#login-error{
+  font-size:12px;color:#f87171;text-align:center;
+  margin-bottom:12px;min-height:18px;
+  display:none;
+}
+#login-error.show{display:block;}
+
+.login-btn{
+  width:100%;padding:13px;margin-top:4px;
+  background:linear-gradient(135deg,#7c3aed,#2563eb);
+  border:none;border-radius:10px;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:14px;
+  color:#fff;cursor:pointer;
+  transition:opacity .2s,transform .15s;
+  box-shadow:0 0 20px #7c3aed50;
+}
+.login-btn:hover{opacity:.9;}
+.login-btn:active{transform:scale(.98);}
+
+.login-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6;}
+
+/* ══════════════════════════════
+   HEADER
+══════════════════════════════ */
+header{
+  position:sticky;top:0;z-index:200;
+  background:#07070acc;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border2);
+  padding:16px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#7c3aed,#2563eb);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;font-family:'Syne',sans-serif;box-shadow:0 0 18px #7c3aed60,0 0 40px #7c3aed20;}
+.brand-text h1{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;letter-spacing:-.2px;}
+.brand-text p{font-size:11px;color:var(--muted);margin-top:1px;}
+
+.header-right{display:flex;align-items:center;gap:10px;}
+.score-badge{background:linear-gradient(135deg,#7c3aed18,#2563eb12);border:1px solid #7c3aed40;border-radius:99px;padding:6px 16px;display:flex;align-items:center;gap:8px;}
+.score-badge .num{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;background:linear-gradient(135deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 8px #a78bfa80);}
+.score-badge .lbl{font-size:10px;color:var(--muted);line-height:1.4;}
+
+.user-pill{
+  display:flex;align-items:center;gap:7px;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:99px;padding:6px 12px 6px 8px;cursor:pointer;
+  transition:all .2s;font-size:12px;color:var(--muted2);
+}
+.user-pill:hover{border-color:#7c3aed50;color:var(--text);}
+.user-avatar{
+  width:22px;height:22px;border-radius:50%;
+  background:linear-gradient(135deg,#7c3aed,#2563eb);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;font-family:'Syne',sans-serif;color:#fff;
+  flex-shrink:0;
+}
+
+/* ══════════════════════════════
+   MAIN
+══════════════════════════════ */
+main{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:40px 28px 80px;}
+
+.chart-card{
+  background:var(--surface);border:1px solid var(--border2);border-radius:20px;
+  padding:28px 28px 20px;margin-bottom:28px;position:relative;overflow:hidden;
+}
+.chart-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 5%,#7c3aed80 35%,#60a5fa80 65%,transparent 95%);}
+.chart-card::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:120px;background:radial-gradient(ellipse,#7c3aed08 0%,transparent 70%);pointer-events:none;}
+
+.chart-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;position:relative;z-index:1;}
+.chart-heading{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;letter-spacing:-.3px;}
+.chart-heading small{display:block;font-size:11.5px;color:var(--muted);font-family:'Inter',sans-serif;font-weight:400;margin-top:3px;}
+
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{display:flex;align-items:center;gap:6px;border-radius:99px;padding:7px 14px;cursor:pointer;font-family:'Inter',sans-serif;font-size:11.5px;font-weight:500;transition:all .2s;white-space:nowrap;border:1px solid var(--border2);background:var(--surface2);color:var(--muted2);}
+.btn:hover{border-color:#7c3aed50;color:var(--text);}
+.btn.active{background:linear-gradient(135deg,#7c3aed18,#2563eb10);border-color:#7c3aed60;color:#c4b5fd;box-shadow:0 0 12px #7c3aed20;}
+
+.canvas-wrap{width:100%;height:280px;position:relative;z-index:1;}
+canvas{display:block;width:100%;height:100%;}
+
+.chart-legend{display:flex;flex-wrap:wrap;gap:5px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);position:relative;z-index:1;}
+.cl-item{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:transparent;cursor:pointer;transition:all .18s;user-select:none;}
+.cl-item:hover{background:var(--surface2);}
+.cl-item.hi{opacity:.25;}
+.cl-swatch{width:7px;height:7px;border-radius:2px;flex-shrink:0;}
+.cl-lbl{font-size:10.5px;color:var(--muted2);}
+.cl-pct{font-family:'Syne',sans-serif;font-size:10.5px;font-weight:700;margin-left:2px;}
+
+.sec-title{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;}
+
+/* ── CONTROL CARD ── */
+.cc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;transition:all .2s;}
+.cc:hover{background:var(--surface2);border-color:var(--border2);}
+
+.cc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cc-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+.cc-colorbar{width:3px;height:32px;border-radius:99px;flex-shrink:0;}
+.cc-info{min-width:0;}
+.cc-name{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cc-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+
+/* right side: pct on top, actions row below */
+.cc-right{
+  display:flex;flex-direction:column;align-items:flex-end;gap:5px;
+  flex-shrink:0;
+}
+.cc-pct{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:16px;
+  width:46px;text-align:right;flex-shrink:0;line-height:1;
+}
+.cc-actions{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.cc-btns{display:flex;gap:4px;flex-shrink:0;}
+.xbt{
+  width:24px;height:24px;border-radius:6px;
+  border:1px solid var(--border2);background:var(--surface2);
+  cursor:pointer;font-size:15px;line-height:1;color:var(--muted2);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s,border-color .15s,color .15s;
+  flex-shrink:0;
+}
+.xbt:hover{background:#1e1e2e;color:var(--text);border-color:#7c3aed50;}
+.xbt-ignore{
+  width:24px;height:24px;border-radius:6px;
+  border:1px solid var(--border2);background:var(--surface2);
+  cursor:pointer;font-size:11px;line-height:1;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s,border-color .15s,color .15s;
+  flex-shrink:0;
+}
+.xbt-ignore:hover{background:#1e1e2e;color:#f87171;border-color:#f8717150;}
+.xbt-ignore.on{background:#f8717115;border-color:#f8717160;color:#f87171;box-shadow:0 0 8px #f8717130;}
+.cc.ignored{opacity:.4;}
+.cc.ignored .stps,.cc.ignored .cn{pointer-events:none;}
+
+.stps{display:flex;gap:3px;margin-bottom:8px;}
+.st{flex:1;height:2.5px;border-radius:99px;background:var(--border2);cursor:pointer;transition:transform .1s,background .2s;}
+.st:hover{transform:scaleY(3);}
+
+.cn{width:100%;font-family:'Inter',sans-serif;font-size:10.5px;color:var(--muted2);background:transparent;border:none;border-top:1px solid var(--border);outline:none;padding:6px 0 0;resize:none;line-height:1.5;}
+.cn::placeholder{color:#ffffff12;}
+.cn:focus{color:var(--text);}
+
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.chart-card{animation:up .4s ease both;}
+.cc{animation:up .3s ease both;}
+
+@media(max-width:600px){
+  header{padding:12px 16px;}
+  main{padding:20px 12px 60px;}
+  .canvas-wrap{height:200px;}
+  .grid{grid-template-columns:1fr;}
+  .login-box{margin:16px;padding:32px 24px 28px;}
+}
+</style>
+</head>
+<body>
+<div class="glow-1"></div>
+<div class="glow-2"></div>
+<div class="glow-3"></div>
+
+<!-- ══ LOGIN OVERLAY ══ -->
+<div id="overlay">
+  <div class="login-box">
+    <div class="login-logo">S</div>
+    <div class="login-title">SMMA Studio</div>
+    <div class="login-sub">Connecte-toi pour accéder à ta progression.<br>Première visite ? Un compte sera créé automatiquement.</div>
+
+    <div class="field">
+      <label>Nom d'utilisateur</label>
+      <input type="text" id="inp-user" placeholder="ex: thomas_smma" autocomplete="username"/>
+    </div>
+    <div class="field">
+      <label>Mot de passe</label>
+      <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+
+    <div id="login-error"></div>
+
+    <button class="login-btn" id="login-btn">Accéder à mon tableau de bord →</button>
+    <div class="login-hint">Les données sont sauvegardées localement par utilisateur.<br>Personne ne peut modifier tes statistiques sans ton mot de passe.</div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<header>
+  <div class="brand">
+    <div class="brand-mark">S</div>
+    <div class="brand-text">
+      <h1>SMMA Studio</h1>
+      <p>Tableau de progression</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="score-badge">
+      <div>
+        <div class="lbl">Score global</div>
+        <div class="num" id="score">0%</div>
+      </div>
+    </div>
+    <div class="user-pill" id="user-pill" title="Changer d'utilisateur">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <span id="user-name">—</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-heading">
+        Avancement par dimension
+        <small>Cliquer la légende pour masquer • Vue totale = moyenne globale</small>
+      </div>
+      <div class="header-actions">
+        <button class="btn" id="btn-total">◎ Vue totale</button>
+        <button class="btn" id="btn-sort">⇅ Trier</button>
+      </div>
+    </div>
+    <div class="canvas-wrap"><canvas id="chart"></canvas></div>
+    <div class="chart-legend" id="legend"></div>
+  </div>
+
+  <div class="sec-title">Modifier les étapes</div>
+  <div class="grid" id="controls"></div>
+</main>
+
+<script>
+/* ══════════════════════════════
+   STORAGE HELPERS — with fallback
+══════════════════════════════ */
+const _mem = {}; // in-memory fallback
+
+function lsGet(k) {
+  try { const v = localStorage.getItem(k); return v; }
+  catch { return _mem[k] ?? null; }
+}
+function lsSet(k, v) {
+  try { localStorage.setItem(k, v); }
+  catch {}
+  _mem[k] = v;
+}
+function lsRemove(k) {
+  try { localStorage.removeItem(k); }
+  catch {}
+  delete _mem[k];
+}
+
+/* ══════════════════════════════
+   AUTH
+══════════════════════════════ */
+const USERS_KEY = 'smma_users_v1';
+const SESSION_KEY = 'smma_session_v1';
+
+function getUsers() {
+  try { return JSON.parse(lsGet(USERS_KEY)) || {}; } catch { return {}; }
+}
+function saveUsers(u) { lsSet(USERS_KEY, JSON.stringify(u)); }
+
+let currentUser = null;
+
+function tryLogin(username, password) {
+  const u = username.trim().toLowerCase().replace(/\s+/g,'_');
+  const p = password;
+  if (!u || !p) return { ok: false, msg: 'Remplis les deux champs.' };
+  if (u.length < 2) return { ok: false, msg: 'Nom trop court (min 2 caractères).' };
+  if (p.length < 4) return { ok: false, msg: 'Mot de passe trop court (min 4 caractères).' };
+
+  const users = getUsers();
+  if (users[u]) {
+    if (users[u].hash !== simpleHash(p)) return { ok: false, msg: 'Mot de passe incorrect.' };
+    return { ok: true, isNew: false, username: u };
+  } else {
+    users[u] = { hash: simpleHash(p), created: Date.now() };
+    saveUsers(users);
+    return { ok: true, isNew: true, username: u };
+  }
+}
+
+function simpleHash(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16);
+}
+
+function sessionSave(u) { lsSet(SESSION_KEY, u); }
+function sessionLoad() { return lsGet(SESSION_KEY); }
+function sessionClear() { lsRemove(SESSION_KEY); }
+
+/* ══════════════════════════════
+   USER DATA STORE
+══════════════════════════════ */
+function userKey(u) { return 'smma_data_' + u; }
+function loadState(u) {
+  try { return JSON.parse(lsGet(userKey(u))) || {}; } catch { return {}; }
+}
+function saveState(u, s) { lsSet(userKey(u), JSON.stringify(s)); }
+
+/* ══════════════════════════════
+   CATEGORIES
+══════════════════════════════ */
+const STEPS = [0, 10, 25, 50, 75, 90, 100];
+const CATS = [
+  // ─ Identité
+  { id:'nom',          label:'Nom agence',       sub:'Identité verbale & slogan' },
+  { id:'niche',        label:'Niche',             sub:'Secteur & spécialisation' },
+  { id:'logo',         label:'Logo & Charte',     sub:'Visual, couleurs, typo' },
+  { id:'domaine',      label:'Nom de domaine',    sub:'Achat & configuration DNS' },
+  // ─ Offre
+  { id:'services',     label:'Services',          sub:'Offres & livrables' },
+  { id:'offre',        label:'Offre packagée',    sub:'Proposition de valeur' },
+  { id:'tarif',        label:'Tarification',      sub:'Grille de prix & marges' },
+  { id:'contrat',      label:'Contrats & CGV',    sub:'Templates & mentions légales' },
+  // ─ Infrastructure
+  { id:'site',         label:'Site web',          sub:'Landing / vitrine' },
+  { id:'outils',       label:'Suite d\'outils',   sub:'CRM, automatisation' },
+  { id:'paiement',     label:'Paiement',          sub:'Stripe, facturation' },
+  { id:'visio',        label:'Visio & Agenda',    sub:'Calendly, Zoom, Meet' },
+  { id:'email_pro',    label:'Email pro',         sub:'Domaine @agence, signature' },
+  // ─ Acquisition
+  { id:'prospection',  label:'Prospection',       sub:'Cold email, LinkedIn, DM' },
+  { id:'script',       label:'Scripts de vente',  sub:'Appels, objections, closing' },
+  { id:'cas_clients',  label:'Cas clients',       sub:'Études de cas, résultats' },
+  // ─ Opérations
+  { id:'onboarding',   label:'Onboarding client', sub:'Process d\'accueil client' },
+  { id:'reporting',    label:'Reporting',         sub:'Tableaux de bord & métriques' },
+  { id:'equipe',       label:'Équipe / Freelance', sub:'Recrutement & délégation' },
+];
+
+const PALETTE = [
+  {h:'#c084fc',s:'#7c3aed'},
+  {h:'#67e8f9',s:'#0891b2'},
+  {h:'#4ade80',s:'#16a34a'},
+  {h:'#f472b6',s:'#be185d'},
+  {h:'#fb923c',s:'#c2410c'},
+  {h:'#facc15',s:'#a16207'},
+  {h:'#38bdf8',s:'#0369a1'},
+  {h:'#a3e635',s:'#4d7c0f'},
+  {h:'#e879f9',s:'#a21caf'},
+  {h:'#f87171',s:'#b91c1c'},
+  {h:'#2dd4bf',s:'#0f766e'},
+  {h:'#818cf8',s:'#4338ca'},
+  {h:'#fb7185',s:'#be123c'},
+  {h:'#34d399',s:'#059669'},
+  {h:'#fbbf24',s:'#b45309'},
+  {h:'#60a5fa',s:'#1d4ed8'},
+  {h:'#f9a8d4',s:'#be185d'},
+  {h:'#86efac',s:'#15803d'},
+  {h:'#fca5a5',s:'#dc2626'},
+];
+
+/* ══════════════════════════════
+   APP STATE
+══════════════════════════════ */
+let state = {};
+
+function getIgnored(id) { return state[id]?.ignored ?? false; }
+function setIgnored(id, v) {
+  if (!state[id]) state[id] = {};
+  state[id].ignored = v;
+  saveState(currentUser, state);
+}
+
+function getPct(id) { return state[id]?.pct ?? 0; }
+function getNote(id) { return state[id]?.note ?? ''; }
+function setPct(id, v) {
+  if (!state[id]) state[id] = {};
+  state[id].pct = v;
+  saveState(currentUser, state);
+  refresh();
+}
+function setNote(id, v) {
+  if (!state[id]) state[id] = {};
+  state[id].note = v;
+  saveState(currentUser, state);
+}
+
+/* ══════════════════════════════
+   LOGIN LOGIC
+══════════════════════════════ */
+function showError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideError() {
+  document.getElementById('login-error').classList.remove('show');
+}
+
+function doLogin() {
+  hideError();
+  const u = document.getElementById('inp-user').value;
+  const p = document.getElementById('inp-pass').value;
+  const result = tryLogin(u, p);
+  if (!result.ok) { showError(result.msg); return; }
+
+  currentUser = result.username;
+  sessionSave(currentUser);
+  state = loadState(currentUser);
+
+  // update UI
+  document.getElementById('user-name').textContent = currentUser;
+  const av = document.getElementById('user-avatar');
+  av.textContent = currentUser[0].toUpperCase();
+
+  document.getElementById('overlay').style.display = 'none';
+
+  buildLegend();
+  buildControls();
+  refresh();
+}
+
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('inp-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('inp-user').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('inp-pass').focus(); });
+
+// logout / switch user
+document.getElementById('user-pill').addEventListener('click', () => {
+  sessionClear();
+  currentUser = null;
+  state = {};
+  document.getElementById('inp-user').value = '';
+  document.getElementById('inp-pass').value = '';
+  hideError();
+  document.getElementById('overlay').style.display = 'flex';
+});
+
+// auto-login from session
+const sess = sessionLoad();
+if (sess) {
+  const users = getUsers();
+  if (users[sess]) {
+    currentUser = sess;
+    state = loadState(currentUser);
+    document.getElementById('user-name').textContent = currentUser;
+    document.getElementById('user-avatar').textContent = currentUser[0].toUpperCase();
+    document.getElementById('overlay').style.display = 'none';
+  }
+}
+
+/* ══════════════════════════════
+   CHART
+══════════════════════════════ */
+let totalOnly = false;
+let sorted = false;
+const hidden = new Set();
+
+document.getElementById('btn-total').addEventListener('click', () => {
+  totalOnly = !totalOnly;
+  document.getElementById('btn-total').classList.toggle('active', totalOnly);
+  renderChart();
+});
+document.getElementById('btn-sort').addEventListener('click', () => {
+  sorted = !sorted;
+  document.getElementById('btn-sort').classList.toggle('active', sorted);
+  renderChart();
+});
+
+const canvas = document.getElementById('chart');
+const ctx = canvas.getContext('2d');
+
+function renderChart() {
+  const wrap = canvas.parentElement;
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const activeCats = CATS.filter(c => !getIgnored(c.id));
+  const avg = activeCats.length ? activeCats.reduce((s, c) => s + getPct(c.id), 0) / activeCats.length : 0;
+  let order = [...CATS.keys()];
+  if (sorted) order.sort((a, b) => getPct(CATS[b].id) - getPct(CATS[a].id));
+
+  const PAD = { top: 14, right: 18, bottom: 48, left: 36 };
+  const cw = W - PAD.left - PAD.right;
+  const ch = H - PAD.top - PAD.bottom;
+  const n = CATS.length;
+  const gap = Math.max(2, cw * 0.012);
+  const barW = (cw - (n - 1) * gap) / n;
+
+  // grid
+  [0, 25, 50, 75, 100].forEach(lvl => {
+    const y = PAD.top + ch * (1 - lvl / 100);
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + cw, y);
+    ctx.strokeStyle = lvl === 0 ? '#ffffff15' : '#ffffff07'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = '#44425a'; ctx.font = '300 9px Inter'; ctx.textAlign = 'right';
+    ctx.fillText(lvl + '%', PAD.left - 5, y + 3);
+  });
+
+  // bars
+  order.forEach((ci, slot) => {
+    const c = CATS[ci];
+    const pal = PALETTE[ci % PALETTE.length];
+    const pct = getPct(c.id);
+    const isIgnored = getIgnored(c.id);
+    const isHidden = hidden.has(c.id) || isIgnored;
+    const x = PAD.left + slot * (barW + gap);
+    const barH = ch * pct / 100;
+    const y = PAD.top + ch - barH;
+
+    // track bg
+    ctx.fillStyle = '#ffffff05';
+    ctx.beginPath(); roundRect(ctx, x, PAD.top, barW, ch, 4); ctx.fill();
+
+    if (!isHidden && !totalOnly && pct > 0) {
+      const grad = ctx.createLinearGradient(0, y + barH, 0, y);
+      grad.addColorStop(0, pal.s + 'cc');
+      grad.addColorStop(0.6, pal.h + 'dd');
+      grad.addColorStop(1, pal.h);
+      ctx.fillStyle = grad;
+      ctx.beginPath(); roundRect(ctx, x, y, barW, barH, pct < 8 ? 2 : 5); ctx.fill();
+
+      ctx.save();
+      ctx.shadowColor = pal.h; ctx.shadowBlur = 16;
+      ctx.strokeStyle = pal.h + '70'; ctx.lineWidth = 1;
+      ctx.beginPath(); roundRect(ctx, x, y, barW, barH, pct < 8 ? 2 : 5); ctx.stroke();
+      ctx.restore();
+
+      const capH = Math.min(4, barH);
+      const capG = ctx.createLinearGradient(0, y, 0, y + capH * 3);
+      capG.addColorStop(0, '#ffffff55'); capG.addColorStop(1, 'transparent');
+      ctx.fillStyle = capG;
+      ctx.beginPath(); roundRect(ctx, x + 2, y, barW - 4, capH, 3); ctx.fill();
+
+      ctx.save();
+      ctx.shadowColor = pal.h; ctx.shadowBlur = 8;
+      ctx.fillStyle = pal.h; ctx.font = '700 9.5px Syne'; ctx.textAlign = 'center';
+      ctx.fillText(pct + '%', x + barW / 2, y - 5);
+      ctx.restore();
+    }
+
+    // x label
+    ctx.save();
+    ctx.fillStyle = isHidden || totalOnly ? '#ffffff18' : '#6e6c8a';
+    ctx.font = '400 9px Inter'; ctx.textAlign = 'right'; ctx.shadowBlur = 0;
+    ctx.translate(x + barW / 2, PAD.top + ch + 12);
+    ctx.rotate(-0.44);
+    ctx.fillText(c.label, 0, 0);
+    ctx.restore();
+  });
+
+  // avg line
+  const avgY = PAD.top + ch * (1 - avg / 100);
+  ctx.save();
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath(); ctx.moveTo(PAD.left, avgY); ctx.lineTo(PAD.left + cw, avgY);
+  ctx.strokeStyle = '#ffffff50'; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.restore();
+  ctx.save();
+  ctx.shadowColor = '#a78bfa'; ctx.shadowBlur = 10;
+  ctx.fillStyle = '#a78bfa'; ctx.font = '600 10px Syne'; ctx.textAlign = 'right';
+  ctx.fillText('⌀ ' + Math.round(avg) + '%', PAD.left + cw, avgY - 5);
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  if (h < r * 2) r = h / 2;
+  if (r < 0) r = 0;
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x, y + h);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+/* ══════════════════════════════
+   LEGEND
+══════════════════════════════ */
+function buildLegend() {
+  const leg = document.getElementById('legend'); leg.innerHTML = '';
+  CATS.forEach((c, i) => {
+    const pal = PALETTE[i % PALETTE.length];
+    const item = document.createElement('div');
+    item.className = 'cl-item' + (hidden.has(c.id) ? ' hi' : '');
+    item.id = 'cl-' + c.id;
+    item.innerHTML = `<div class="cl-swatch" style="background:${pal.h};box-shadow:0 0 5px ${pal.h}80"></div><span class="cl-lbl">${c.label}</span><span class="cl-pct" style="color:${pal.h}" id="clp-${c.id}">${getIgnored(c.id) ? '—' : getPct(c.id)+'%'}</span>`;
+    item.addEventListener('click', () => {
+      if (hidden.has(c.id)) hidden.delete(c.id); else hidden.add(c.id);
+      item.classList.toggle('hi'); renderChart();
+    });
+    leg.appendChild(item);
+  });
+}
+function updateLegend() {
+  CATS.forEach(c => {
+    const el = document.getElementById('clp-' + c.id);
+    if (el) el.textContent = getIgnored(c.id) ? '—' : getPct(c.id) + '%';
+    const item = document.getElementById('cl-' + c.id);
+    if (item) item.classList.toggle('hi', getIgnored(c.id));
+  });
+}
+
+/* ══════════════════════════════
+   CONTROLS
+══════════════════════════════ */
+function buildControls() {
+  const grid = document.getElementById('controls'); grid.innerHTML = '';
+  CATS.forEach((c, ci) => {
+    const pal = PALETTE[ci % PALETTE.length];
+    const pct = getPct(c.id);
+    const noteVal = getNote(c.id);
+    const card = document.createElement('div');
+    card.className = 'cc';
+    card.style.animationDelay = (ci * 0.02) + 's';
+    const isIgnored = getIgnored(c.id);
+    if (isIgnored) card.classList.add('ignored');
+    card.innerHTML = `
+      <div class="cc-top">
+        <div class="cc-left">
+          <div class="cc-colorbar" style="background:linear-gradient(to bottom,${pal.h},${pal.s});box-shadow:0 0 8px ${pal.h}60"></div>
+          <div class="cc-info">
+            <div class="cc-name">${c.label}</div>
+            <div class="cc-sub">${c.sub}</div>
+          </div>
+        </div>
+        <div class="cc-right">
+          <div class="cc-pct" id="cp-${c.id}" style="color:${isIgnored?'var(--muted)':pal.h};text-shadow:${isIgnored?'none':'0 0 12px '+pal.h+'70'}">${isIgnored ? '—' : pct+'%'}</div>
+          <div class="cc-actions">
+            <div class="cc-btns">
+              <button class="xbt" id="mi-${c.id}" type="button" ${isIgnored?'disabled':''}style="${isIgnored?'opacity:.3;cursor:default':''}">−</button>
+              <button class="xbt" id="pl-${c.id}" type="button" ${isIgnored?'disabled':''}style="${isIgnored?'opacity:.3;cursor:default':''}">+</button>
+            </div>
+            <button class="xbt-ignore${isIgnored?' on':''}" id="ig-${c.id}" type="button" title="${isIgnored?'Réactiver':'Ignorer cette catégorie'}">✕</button>
+          </div>
+        </div>
+      </div>
+      <div class="stps" id="st-${c.id}">
+        ${STEPS.map((s, si) => `<div class="st" id="s-${c.id}-${si}" data-id="${c.id}" data-step="${s}" title="${s}%" style="${s <= pct && !isIgnored ? 'background:' + pal.h + '80;box-shadow:0 0 4px ' + pal.h + '50' : ''}"></div>`).join('')}
+      </div>
+      <textarea class="cn" id="nt-${c.id}" rows="1" placeholder="Note…">${noteVal}</textarea>
+    `;
+    grid.appendChild(card);
+
+    document.getElementById('ig-' + c.id).addEventListener('click', e => {
+      e.preventDefault();
+      const nowIgnored = !getIgnored(c.id);
+      setIgnored(c.id, nowIgnored);
+      buildControls(); // rebuild to reflect state
+      buildLegend();
+      refresh();
+    });
+
+    document.getElementById('mi-' + c.id).addEventListener('click', e => {
+      e.preventDefault();
+      if (getIgnored(c.id)) return;
+      const cur = getPct(c.id);
+      setPct(c.id, [...STEPS].reverse().find(s => s < cur) ?? 0);
+    });
+    document.getElementById('pl-' + c.id).addEventListener('click', e => {
+      e.preventDefault();
+      if (getIgnored(c.id)) return;
+      const cur = getPct(c.id);
+      setPct(c.id, STEPS.find(s => s > cur) ?? 100);
+    });
+
+    card.querySelectorAll('.st').forEach(d => {
+      d.addEventListener('click', () => {
+        if (!getIgnored(d.dataset.id)) setPct(d.dataset.id, parseInt(d.dataset.step));
+      });
+    });
+
+    const nEl = document.getElementById('nt-' + c.id);
+    nEl.addEventListener('input', () => {
+      nEl.style.height = 'auto';
+      nEl.style.height = nEl.scrollHeight + 'px';
+      setNote(c.id, nEl.value);
+    });
+    if (noteVal) setTimeout(() => { nEl.style.height = 'auto'; nEl.style.height = nEl.scrollHeight + 'px'; }, 0);
+  });
+}
+
+function updateControls() {
+  CATS.forEach((c, ci) => {
+    const pal = PALETTE[ci % PALETTE.length];
+    const pct = getPct(c.id);
+    const isIgnored = getIgnored(c.id);
+    const el = document.getElementById('cp-' + c.id);
+    if (el) {
+      el.textContent = isIgnored ? '—' : pct + '%';
+      el.style.color = isIgnored ? 'var(--muted)' : pal.h;
+      el.style.textShadow = isIgnored ? 'none' : `0 0 12px ${pal.h}70`;
+    }
+    if (!isIgnored) {
+      STEPS.forEach((s, si) => {
+        const d = document.getElementById(`s-${c.id}-${si}`);
+        if (d) {
+          d.style.background = s <= pct ? pal.h + '80' : '';
+          d.style.boxShadow = s <= pct ? `0 0 4px ${pal.h}50` : '';
+        }
+      });
+    }
+  });
+}
+
+function updateHeader() {
+  const active = CATS.filter(c => !getIgnored(c.id));
+  const avg = active.length ? active.reduce((s, c) => s + getPct(c.id), 0) / active.length : 0;
+  document.getElementById('score').textContent = Math.round(avg) + '%';
+}
+
+function refresh() { renderChart(); updateControls(); updateLegend(); updateHeader(); }
+
+// init only if already logged in
+if (currentUser) {
+  buildLegend();
+  buildControls();
+  refresh();
+}
+
+window.addEventListener('resize', () => renderChart());
+</script>
+</body>
+</html>
